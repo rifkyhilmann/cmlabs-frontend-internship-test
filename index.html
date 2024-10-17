@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .primary {
+            color: #283A4E;
+        }
+        .color-banner {
+            background-color: #f7fafd;
+        }
+    </style>
+    <title>cmlabs-frontend-internship-test</title>
+</head>
+<body>
+    <nav class="w-full h-14 shadow-md grid grid-cols-1 md:grid-cols-2 items-center px-4 border-b text-[#283A4E]">
+        <!-- Logo / Brand Section -->
+        <div class="flex items-center justify-between ">
+            <p class="text-2xl font-bold text-primary">mealapp</p>
+            <i id="bars-toggle" class="fas fa-bars text-xl cursor-pointer md:hidden flex"></i>
+        </div>
+    
+        <!-- Navigation Links -->
+        <div id="nav-menu" class="absolute md:relative md:top-0 top-16 hidden md:flex flex-col md:flex-row items-center md:justify-end gap-4 font-medium  bg-pink-400 md:right-0 right-10 
+        md:left-0 left-10 py-5 md:py-0 bg-white shadow-lg md:shadow-none rounded" id="nav-links">
+            <a href="#" class="hover:text-primary">Home</a>
+            <a href="#" class="hover:text-primary">Food</a>
+            <a href="#" class="hover:text-primary">Ingredients</a>
+            <a href="#" class="hover:text-primary">Local Culinary</a>
+        </div>
+    </nav>
+
+    <div class="w-full h-[300px] color-banner flex flex-col items-center justify-center gap-5 text-[#283A4E]">
+        <div class="flex items-center gap-4">
+            <img src="assets/bowl.png" class="h-5 w-5" alt="">
+            <img src="assets/rice.png" class="h-5 w-5" alt="">
+            <img src="assets/cookie.png" class="h-5 w-5" alt="">
+        </div>
+        <p class="font-bold text-md">mealapp API website</p>
+        <p class="text-2xl md:text-4xl font-bold">See All The Delicious Foods</p>
+    </div>
+
+    <div class="w-full h-max flex items-center justify-center my-14">
+        <div id="data-list" class="w-[90%] h-max grid xl:grid-cols-4 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-2 gap-5 max-w-[800px]">
+        </div>
+    </div>
+    
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script >
+        $(document).ready(function() {
+            $('#bars-toggle').click(function() {
+                $('#nav-menu').toggleClass('hidden flex');
+                $(this).toggleClass('fa-bars fa-times');
+            });
+            
+            function fetchData() {
+                axios.get('https://www.themealdb.com/api/json/v1/1/categories.php')
+                    .then(function(response) {
+                        $('#data-list').empty(); 
+        
+                        response.data.categories.forEach(function(category) {
+                            $('#data-list').append(`
+                                <div 
+                                    onclick="gotoDetailCategory('${category.strCategory}')" 
+                                    style="background-image: url('${category.strCategoryThumb}'); background-repeat: no-repeat; background-size: cover;"
+                                    class="h-[100px] bg-black rounded-2xl relative flex items-center justify-center cursor-pointer transition-transform duration-300 transform hover:scale-105">
+                                    <div class="absolute inset-0 bg-black opacity-40 rounded-2xl"></div>
+                                    <span class="relative text-white text-lg font-semibold">${category.strCategory}</span>
+                                </div>
+                            `);
+                        });
+                    })
+                    .catch(function(error) {
+                        console.error('Error fetching data:', error);
+                    });
+            }
+        
+            fetchData()
+
+            window.gotoDetailCategory = function(categoryName) { 
+                window.location.href = `CategoryDetail.html?category=${encodeURIComponent(categoryName)}`;
+            };
+        });
+    </script>
+</body>
+</html>

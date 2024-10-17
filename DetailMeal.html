@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <title>Detail Meals</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .primary {
+            color: #283A4E;
+        }
+        .color-banner {
+            background-color: #f7fafd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="w-full h-14 shadow-md grid grid-cols-1 md:grid-cols-2 items-center px-4 border-b text-[#283A4E]">
+        <!-- Logo / Brand Section -->
+        <div class="flex items-center justify-between ">
+            <p class="text-2xl font-bold text-primary">mealapp</p>
+            <i id="bars-toggle" class="fas fa-bars text-xl cursor-pointer md:hidden flex"></i>
+        </div>
+    
+        <!-- Navigation Links -->
+        <div id="nav-menu" class="absolute md:relative md:top-0 top-16 hidden md:flex flex-col md:flex-row items-center md:justify-end gap-4 font-medium  bg-pink-400 md:right-0 right-10 
+        md:left-0 left-10 py-5 md:py-0 bg-white shadow-lg md:shadow-none rounded" id="nav-links">
+            <a href="index.html" class="hover:text-primary">Home</a>
+            <a href="#" class="hover:text-primary">Food</a>
+            <a href="#" class="hover:text-primary">Ingredients</a>
+            <a href="#" class="hover:text-primary">Local Culinary</a>
+        </div>
+    </nav>
+
+    <div class="w-full h-max flex flex-col gap-10 items-center justify-center mt-9 mb-14">
+        <div class="flex flex-col gap-5 w-[90%] max-w-[800px] h-max primary ">
+            <div class="flex items-center gap-2 md:gap-5   font-semibold">
+                <i class="fas fa-home"></i>
+                <p class="text-sm ">Home</p>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+                <p class="text-sm ">Foods</p>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+                <p id='category-name' class="text-sm "></p>
+                <i class="fas fa-chevron-right text-gray-400"></i>
+                <p id='meal-name' class="text-gray-500 text-sm font-normal"></p>
+            </div>
+            <div class="flex items-center gap-2 text-4xl    font-normal my-5">
+                <p id='category-names'  ></p>
+            </div>
+            <hr >
+            <p id="meal-area" class="text-[#FD5D5D] font-semibold mt-3"></p>
+            <div class="w-full h-max grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <img id="meal-images" src="assets/food.jpeg" class="rounded-xl  " alt="">
+                <div class="flex flex-col gap-3">
+                    <p class="text-2xl font-normal">Instructions</p>
+                    <p id="instruction" class="text-xs"></p>
+                    <p class="text-3xl">Recipes</p>
+                    <div id="ingredients"></div>
+                </div>
+            </div>
+            <p class="text-center text-2xl font-semibold mt-6">Tutorials</p>
+            <iframe id="youtube-video" class="w-full h-[300px]" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#bars-toggle').click(function() {
+                $('#nav-menu').toggleClass('hidden flex');
+                $(this).toggleClass('fa-bars fa-times');
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const idMeal = urlParams.get('idMeal')
+
+            if(idMeal) {
+                axios.get(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${idMeal}`)
+                    .then(response => {
+                        const data = response.data.meals[0]
+                        if(data) {
+                            const mealImage = $('#meal-images');
+                            mealImage.attr('src', data.strMealThumb);
+                            $('#category-name').text(data.strCategory)
+                            $('#category-names').text(data.strMeal)
+                            $('#meal-area').text(data.strArea)
+                            $('#meal-name').text(data.strMeal)
+                            const instructionsFormatted = data.strInstructions.replace(/\n/g, '<br>');
+                            $('#instruction').html(instructionsFormatted);
+
+                            const ingredientsList = [];
+                            for (let i = 1; i <= 20; i++) {
+                                const ingredient = data[`strIngredient${i}`];
+                                const measure = data[`strMeasure${i}`];
+                                if (ingredient) {
+                                    ingredientsList.push(`<li>${measure} ${ingredient}</li>`); // Create list items
+                                }
+                            }
+
+                            const ingredientsHtml = `<ul class="list-disc pl-5 text-xs">${ingredientsList.join('')}</ul>`;
+                            $('#ingredients').html(ingredientsHtml);
+
+                            const youtubeUrl = data.strYoutube;
+                            if (youtubeUrl) {
+                                const videoId = youtubeUrl.split('v=')[1].split('&')[0]; // Extract video ID
+                                const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                                $('#youtube-video').attr('src', embedUrl); // Set iframe src
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error("There was an error fetching the data:", error);
+                    });
+            }
+        })
+    </script>
+</body>
+</html>
